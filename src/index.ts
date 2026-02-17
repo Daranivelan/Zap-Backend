@@ -60,10 +60,29 @@ app.options("*", (req, res) => {
 // ROUTES
 // ============================================================
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Zap Backend API",
+    status: "running",
+    version: "1.0.0",
+    endpoints: {
+      health: "/health",
+      auth: {
+        register: "POST /api/auth/register",
+        login: "POST /api/auth/login",
+      },
+      users: "GET /api/users",
+      messages: "GET /api/messages/:userId",
+      groups: "GET /api/groups",
+    },
+  });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", chatRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/groups", groupRoutes); // Add when ready
+app.use("/api/groups", groupRoutes);
 
 // Health check
 app.get("/health", (req, res) => {
