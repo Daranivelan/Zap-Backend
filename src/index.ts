@@ -88,3 +88,5 @@ process.on("unhandledRejection", (error) => {
   console.error("❌ Unhandled Rejection:", error);
   process.exit(1);
 });
+
+export default app;
