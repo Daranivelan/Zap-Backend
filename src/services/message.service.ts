@@ -27,15 +27,24 @@ export const getUndeliveredMessages = async (userId: string) => {
 };
 
 export const markMessagesAsDelivered = async (ids: string[]) => {
-  if (ids.length === 0) {
-    return;
-  }
+  return prisma.message.updateMany({
+    where: { id: { in: ids } },
+    data: { delivered: true },
+  });
+};
 
-  await prisma.message.updateMany({
+export const markMessageAsSeen = async (
+  senderId: string,
+  receiverId: string,
+) => {
+  return prisma.message.updateMany({
     where: {
-      id: { in: ids },
+      senderId,
+      receiverId,
+      seen: false,
     },
     data: {
+      seen: true,
       delivered: true,
     },
   });
