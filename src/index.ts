@@ -17,15 +17,44 @@ const PORT = process.env.PORT || 5001;
 // MIDDLEWARE
 // ============================================================
 
+// CORS configuration
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://zap-frontend-nine.vercel.app",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or Postman)
+      if (!origin) return callback(null, true);
+
+      if (
+        allowedOrigins.some((allowed) => allowed === origin || allowed === "*")
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   }),
 );
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Handle OPTIONS preflight requests
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", process.env.FRONTEND_URL || "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(200);
+});
 
 // ============================================================
 // ROUTES

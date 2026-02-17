@@ -37,9 +37,15 @@ const activeChats = new Map<string, string>();
  * @returns Configured Socket.IO server instance
  */
 export const initializeSocketIO = (httpServer: HTTPServer): Server => {
+  const allowedOrigins = [
+    "http://localhost:3000",
+    "https://zap-frontend-nine.vercel.app",
+    process.env.FRONTEND_URL,
+  ].filter((origin): origin is string => Boolean(origin));
+
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      origin: allowedOrigins,
       methods: ["GET", "POST"],
       credentials: true,
     },
