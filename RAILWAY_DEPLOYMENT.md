@@ -5,6 +5,16 @@
 - Railway account (sign up at https://railway.app/)
 - GitHub repository connected
 - PostgreSQL database (Railway provides this)
+- **Node.js 20.19+ or higher** (configured automatically via `.nvmrc` and `nixpacks.toml`)
+
+## Important Notes
+
+⚠️ **Node.js Version Requirement**: This project uses Prisma 7.3.0, which requires Node.js 20.19+, 22.12+, or 24.0+. Railway has been configured to use Node.js 20 via:
+
+- `.nvmrc` file
+- `.node-version` file
+- `nixpacks.toml` file
+- `package.json` engines field
 
 ## Step-by-Step Deployment
 
