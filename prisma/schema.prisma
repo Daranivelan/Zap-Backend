@@ -57,6 +57,7 @@ model GroupMessage {
   groupId   String
   senderId  String
   content   String
+  isSystem  Boolean  @default(false)
   createdAt DateTime @default(now())
 
   group  Group @relation(fields: [groupId], references: [id], onDelete: Cascade)

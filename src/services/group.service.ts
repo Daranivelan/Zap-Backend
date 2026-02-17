@@ -275,6 +275,37 @@ export const getGroupMessages = async (
   });
 };
 
+export const createSystemMessage = async (
+  groupId: string,
+  triggeredByUserId: string,
+  content: string,
+) => {
+  return prisma.groupMessage.create({
+    data: {
+      groupId,
+      senderId: triggeredByUserId,
+      content,
+      isSystem: true,
+    },
+    include: {
+      sender: {
+        select: {
+          id: true,
+          username: true,
+        },
+      },
+    },
+  });
+};
+
+export const getUsernameById = async (userId: string): Promise<string> => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { username: true },
+  });
+  return user?.username || "Unknown";
+};
+
 export const sendGroupMessage = async (
   groupId: string,
   senderId: string,

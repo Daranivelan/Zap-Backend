@@ -36,6 +36,14 @@ const activeChats = new Map<string, string>();
  * @param httpServer - HTTP server instance to attach Socket.IO to
  * @returns Configured Socket.IO server instance
  */
+let ioInstance: Server | null = null;
+
+/**
+ * Get the Socket.IO server instance
+ * @returns Socket.IO server instance (or null if not initialized)
+ */
+export const getIO = (): Server | null => ioInstance;
+
 export const initializeSocketIO = (httpServer: HTTPServer): Server => {
   const allowedOrigins = [
     "http://localhost:3000",
@@ -43,7 +51,7 @@ export const initializeSocketIO = (httpServer: HTTPServer): Server => {
     process.env.FRONTEND_URL,
   ].filter((origin): origin is string => Boolean(origin));
 
-  const io = new Server(httpServer, {
+  ioInstance = new Server(httpServer, {
     cors: {
       origin: allowedOrigins,
       methods: ["GET", "POST"],
@@ -57,6 +65,8 @@ export const initializeSocketIO = (httpServer: HTTPServer): Server => {
       threshold: 1024, // Compress messages larger than 1KB
     },
   });
+
+  const io = ioInstance;
 
   console.log("✅ Socket.IO server initialized");
 

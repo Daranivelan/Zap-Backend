@@ -110,6 +110,24 @@ export const setupGroupHandlers = (
 
         await groupService.addGroupMembers(groupId, userId, [memberId]);
 
+        // Create and broadcast system message
+        const memberUsername = await groupService.getUsernameById(memberId);
+        const sysMsg = await groupService.createSystemMessage(
+          groupId,
+          userId,
+          `${username} added ${memberUsername} to the group`,
+        );
+        io.to(`group:${groupId}`).emit("receive_group_message", {
+          id: sysMsg.id,
+          groupId: sysMsg.groupId,
+          senderId: sysMsg.senderId,
+          senderUsername: sysMsg.sender.username,
+          content: sysMsg.content,
+          isSystem: true,
+          createdAt: sysMsg.createdAt,
+          sender: sysMsg.sender,
+        });
+
         io.to(`group:${groupId}`).emit("group_member_added", {
           groupId,
           memberId,
@@ -151,7 +169,25 @@ export const setupGroupHandlers = (
           return;
         }
 
+        const memberUsername = await groupService.getUsernameById(memberId);
         await groupService.removeGroupMember(groupId, userId, memberId);
+
+        // Create and broadcast system message
+        const sysMsg = await groupService.createSystemMessage(
+          groupId,
+          userId,
+          `${username} removed ${memberUsername} from the group`,
+        );
+        io.to(`group:${groupId}`).emit("receive_group_message", {
+          id: sysMsg.id,
+          groupId: sysMsg.groupId,
+          senderId: sysMsg.senderId,
+          senderUsername: sysMsg.sender.username,
+          content: sysMsg.content,
+          isSystem: true,
+          createdAt: sysMsg.createdAt,
+          sender: sysMsg.sender,
+        });
 
         io.to(`group:${groupId}`).emit("group_member_removed", {
           groupId,
@@ -199,6 +235,13 @@ export const setupGroupHandlers = (
         return;
       }
 
+      // Create system message before leaving (so sender is still a member)
+      const sysMsg = await groupService.createSystemMessage(
+        groupId,
+        userId,
+        `${username} left the group`,
+      );
+
       await groupService.leaveGroup(groupId, userId);
 
       socket.leave(`group:${groupId}`);
@@ -210,6 +253,18 @@ export const setupGroupHandlers = (
           groupRooms.delete(groupId);
         }
       }
+
+      // Broadcast system message to remaining members
+      io.to(`group:${groupId}`).emit("receive_group_message", {
+        id: sysMsg.id,
+        groupId: sysMsg.groupId,
+        senderId: sysMsg.senderId,
+        senderUsername: sysMsg.sender.username,
+        content: sysMsg.content,
+        isSystem: true,
+        createdAt: sysMsg.createdAt,
+        sender: sysMsg.sender,
+      });
 
       io.to(`group:${groupId}`).emit("member_left_group", {
         groupId,
